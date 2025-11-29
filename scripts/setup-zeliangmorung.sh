@@ -597,8 +597,8 @@ start_application() {
     else
         echo "🚀 Starting application with PM2..."
         
-        # Create PM2 ecosystem file
-        cat > "$PROJECT_DIR/ecosystem.config.js" <<EOF
+        # Create PM2 ecosystem file (use .cjs extension for CommonJS since package.json has "type": "module")
+        cat > "$PROJECT_DIR/ecosystem.config.cjs" <<EOF
 module.exports = {
   apps: [{
     name: 'zeliangmorung',
@@ -621,11 +621,16 @@ module.exports = {
 };
 EOF
         
+        # Remove old .js config if it exists
+        if [ -f "$PROJECT_DIR/ecosystem.config.js" ]; then
+            rm "$PROJECT_DIR/ecosystem.config.js"
+        fi
+        
         # Create logs directory
         mkdir -p "$PROJECT_DIR/logs"
         
-        # Start with PM2
-        $PM2_CMD start ecosystem.config.js
+        # Start with PM2 using .cjs file
+        $PM2_CMD start ecosystem.config.cjs
         $PM2_CMD save
         $PM2_CMD startup
     fi
