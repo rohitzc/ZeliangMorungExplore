@@ -11,7 +11,7 @@ echo "🚀 ZeliangMorung Explore - Complete Setup"
 echo "=========================================="
 
 # Check if running as root
-if [ "$EUID" -ne 0 ]; then
+if [ "$(id -u)" -ne 0 ]; then
     echo "❌ This script must be run as root (use sudo)"
     exit 1
 fi
@@ -29,8 +29,9 @@ APACHE_CONF_FILE="/etc/apache2/sites-available/zeliangmorung.conf"
 APACHE_ENABLED_FILE="/etc/apache2/sites-enabled/zeliangmorung.conf"
 VHOSTS_DIR="/etc/apache2/sites-available"
 
-# Project directory
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Project directory - get script directory first
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Get port from .envdev file (defaults to 5000 if not found)
 if [ -f "$PROJECT_DIR/.envdev" ]; then
@@ -82,58 +83,59 @@ handle_port_conflicts() {
 install_dependencies() {
     echo "📦 Checking and installing dependencies..."
     
-    local missing_packages=()
+    # Check for required packages and install if missing
+    local need_install=0
     
-    # Check for required packages
     if ! command -v certbot &> /dev/null; then
-        missing_packages+=("certbot")
+        echo "📦 Installing certbot..."
+        apt update
+        apt install -y certbot python3-certbot-apache
+        need_install=1
     fi
     
     if ! command -v openssl &> /dev/null; then
-        missing_packages+=("openssl")
+        echo "📦 Installing openssl..."
+        apt update
+        apt install -y openssl
+        need_install=1
     fi
     
     if ! command -v apache2 &> /dev/null; then
-        missing_packages+=("apache2")
-    fi
-    
-    if ! command -v pm2 &> /dev/null; then
-        missing_packages+=("npm")
+        echo "📦 Installing apache2..."
+        apt update
+        apt install -y apache2
+        need_install=1
     fi
     
     if ! command -v node &> /dev/null; then
-        missing_packages+=("nodejs")
+        echo "📦 Installing nodejs..."
+        apt update
+        apt install -y nodejs
+        need_install=1
     fi
     
-    # Install missing packages
-    if [ ${#missing_packages[@]} -gt 0 ]; then
-        echo "📦 Installing missing packages..."
+    if ! command -v npm &> /dev/null; then
+        echo "📦 Installing npm..."
         apt update
-        
-        for package in "${missing_packages[@]}"; do
-            case $package in
-                "certbot")
-                    apt install -y certbot python3-certbot-apache
-                    ;;
-                "npm")
-                    apt install -y npm
-                    npm install -g pm2
-                    ;;
-                *)
-                    apt install -y "$package"
-                    ;;
-            esac
-        done
-        
-        # Install PM2 if npm is available
-        if command -v npm &> /dev/null && ! command -v pm2 &> /dev/null; then
-            echo "📦 Installing PM2..."
+        apt install -y npm
+        need_install=1
+    fi
+    
+    if ! command -v pm2 &> /dev/null; then
+        echo "📦 Installing PM2..."
+        if command -v npm &> /dev/null; then
             npm install -g pm2
+        else
+            echo "❌ npm not available, cannot install PM2"
+            return 1
         fi
-        
-        echo "✅ Dependencies installed"
-    else
+        need_install=1
+    fi
+    
+    if [ $need_install -eq 0 ]; then
         echo "✅ All dependencies are already installed"
+    else
+        echo "✅ Dependencies installation complete"
     fi
 }
 
@@ -141,9 +143,8 @@ install_dependencies() {
 enable_apache_modules() {
     echo "📦 Enabling required Apache modules..."
     
-    REQUIRED_MODULES=("ssl" "rewrite" "headers" "proxy" "proxy_http" "proxy_wstunnel")
-    
-    for module in "${REQUIRED_MODULES[@]}"; do
+    # Enable modules one by one
+    for module in ssl rewrite headers proxy proxy_http proxy_wstunnel; do
         if ! a2enmod "$module" 2>/dev/null; then
             echo "⚠️  Warning: Could not enable module $module"
         else
