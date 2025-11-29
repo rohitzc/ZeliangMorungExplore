@@ -48,6 +48,47 @@ echo "   Application Port: $PORT"
 echo "   Project Directory: $PROJECT_DIR"
 echo ""
 
+# Function to test port 80 accessibility
+test_port_80() {
+    echo "🔍 Testing port 80 accessibility..."
+    
+    # Start a temporary HTTP server on port 80 for testing
+    if command -v python3 &> /dev/null; then
+        echo "📡 Starting temporary test server on port 80..."
+        timeout 5 python3 -m http.server 80 > /dev/null 2>&1 &
+        local test_pid=$!
+        sleep 2
+        
+        # Test from localhost
+        if curl -s -o /dev/null -w "%{http_code}" --connect-timeout 3 http://localhost/ 2>/dev/null | grep -q "200\|403\|404"; then
+            echo "✅ Port 80 is accessible locally"
+        else
+            echo "⚠️  Port 80 test server did not respond locally"
+        fi
+        
+        # Kill test server
+        kill $test_pid 2>/dev/null
+        wait $test_pid 2>/dev/null
+    fi
+    
+    # Check if we can bind to port 80
+    if timeout 1 bash -c "echo > /dev/tcp/127.0.0.1/80" 2>/dev/null; then
+        echo "✅ Can bind to port 80"
+    else
+        echo "⚠️  Cannot bind to port 80 (might be in use or permission denied)"
+    fi
+    
+    echo ""
+    echo "🌐 IMPORTANT: Test from outside the server:"
+    echo "   From your local machine, run:"
+    echo "   curl -I http://$IP"
+    echo "   or"
+    echo "   curl -I http://$DOMAIN"
+    echo ""
+    echo "   If this fails, your AWS Security Group is blocking port 80!"
+    echo ""
+}
+
 # Function to check and configure firewall
 configure_firewall() {
     echo "🔥 Checking firewall configuration..."
@@ -59,7 +100,10 @@ configure_firewall() {
         ufw allow 80/tcp
         ufw allow 443/tcp
         echo "✅ Firewall rules updated"
-        return 0
+    else
+        if command -v ufw &> /dev/null; then
+            echo "📋 UFW is installed but not active"
+        fi
     fi
     
     # Check if firewalld is active
@@ -70,7 +114,6 @@ configure_firewall() {
         firewall-cmd --permanent --add-service=https
         firewall-cmd --reload
         echo "✅ Firewall rules updated"
-        return 0
     fi
     
     # Check iptables
@@ -85,6 +128,36 @@ configure_firewall() {
             echo "✅ Port 80 appears to be open in iptables"
         fi
     fi
+    
+    echo ""
+    echo "⚠️  AWS SECURITY GROUP CHECK REQUIRED:"
+    echo "======================================"
+    echo "Even if the server firewall allows port 80, AWS Security Groups"
+    echo "must also allow inbound traffic on port 80 from the internet."
+    echo ""
+    echo "📋 To fix AWS Security Group:"
+    echo "   1. Go to AWS Console → EC2 → Security Groups"
+    echo "   2. Select your EC2 instance's security group"
+    echo "   3. Click 'Edit inbound rules'"
+    echo "   4. Add rule:"
+    echo "      - Type: HTTP"
+    echo "      - Protocol: TCP"
+    echo "      - Port: 80"
+    echo "      - Source: 0.0.0.0/0 (or ::/0 for IPv6)"
+    echo "   5. Add another rule:"
+    echo "      - Type: HTTPS"
+    echo "      - Protocol: TCP"
+    echo "      - Port: 443"
+    echo "      - Source: 0.0.0.0/0"
+    echo "   6. Save rules"
+    echo ""
+    echo "🔍 Test from outside (from your local machine):"
+    echo "   curl -I http://$IP"
+    echo "   If this works, port 80 is accessible!"
+    echo ""
+    
+    # Test port 80
+    test_port_80
     
     echo "✅ Firewall check complete"
     return 0
@@ -445,27 +518,72 @@ start_application() {
     
     cd "$PROJECT_DIR"
     
-    # Check if Node.js is installed
-    if ! command -v node &> /dev/null; then
+    # Check if Node.js is installed (check multiple locations)
+    NODE_CMD=""
+    if command -v node &> /dev/null; then
+        NODE_CMD="node"
+    elif [ -f "/usr/bin/node" ]; then
+        NODE_CMD="/usr/bin/node"
+    elif [ -f "/usr/local/bin/node" ]; then
+        NODE_CMD="/usr/local/bin/node"
+    else
         echo "❌ Node.js is not installed"
+        echo "💡 Install Node.js with: apt install -y nodejs"
         return 1
     fi
     
-    # Check if PM2 is installed
-    if ! command -v pm2 &> /dev/null; then
-        echo "📦 Installing PM2..."
-        npm install -g pm2
+    echo "✅ Found Node.js at: $NODE_CMD"
+    echo "   Version: $($NODE_CMD --version 2>/dev/null || echo 'unknown')"
+    
+    # Check if npm is installed
+    NPM_CMD=""
+    if command -v npm &> /dev/null; then
+        NPM_CMD="npm"
+    elif [ -f "/usr/bin/npm" ]; then
+        NPM_CMD="/usr/bin/npm"
+    elif [ -f "/usr/local/bin/npm" ]; then
+        NPM_CMD="/usr/local/bin/npm"
+    else
+        echo "❌ npm is not installed"
+        echo "💡 Install npm with: apt install -y npm"
+        return 1
     fi
+    
+    echo "✅ Found npm at: $NPM_CMD"
+    echo "   Version: $($NPM_CMD --version 2>/dev/null || echo 'unknown')"
+    
+    # Check if PM2 is installed
+    PM2_CMD=""
+    if command -v pm2 &> /dev/null; then
+        PM2_CMD="pm2"
+    elif [ -f "/usr/local/bin/pm2" ]; then
+        PM2_CMD="/usr/local/bin/pm2"
+    elif [ -f "$HOME/.npm-global/bin/pm2" ]; then
+        PM2_CMD="$HOME/.npm-global/bin/pm2"
+    else
+        echo "📦 Installing PM2..."
+        $NPM_CMD install -g pm2
+        if command -v pm2 &> /dev/null; then
+            PM2_CMD="pm2"
+        else
+            echo "❌ Failed to install PM2"
+            return 1
+        fi
+    fi
+    
+    echo "✅ Found PM2 at: $PM2_CMD"
     
     # Install dependencies if node_modules doesn't exist
     if [ ! -d "node_modules" ]; then
         echo "📦 Installing npm dependencies..."
-        npm install
+        $NPM_CMD install
+    else
+        echo "✅ Node modules already installed"
     fi
     
     # Build the application
     echo "🔨 Building application..."
-    npm run build
+    $NPM_CMD run build
     
     if [ $? -ne 0 ]; then
         echo "❌ Build failed"
@@ -473,9 +591,9 @@ start_application() {
     fi
     
     # Check if application is already running in PM2
-    if pm2 list | grep -q "zeliangmorung"; then
+    if $PM2_CMD list 2>/dev/null | grep -q "zeliangmorung"; then
         echo "🔄 Application already running in PM2, restarting..."
-        pm2 restart zeliangmorung
+        $PM2_CMD restart zeliangmorung
     else
         echo "🚀 Starting application with PM2..."
         
@@ -507,24 +625,29 @@ EOF
         mkdir -p "$PROJECT_DIR/logs"
         
         # Start with PM2
-        pm2 start ecosystem.config.js
-        pm2 save
-        pm2 startup
+        $PM2_CMD start ecosystem.config.js
+        $PM2_CMD save
+        $PM2_CMD startup
     fi
     
     # Wait a moment for the app to start
-    sleep 2
+    sleep 3
     
     # Check if application is running
-    if pm2 list | grep -q "zeliangmorung.*online"; then
+    if $PM2_CMD list 2>/dev/null | grep -q "zeliangmorung.*online"; then
         echo "✅ Application is running successfully"
         echo ""
         echo "📊 PM2 Status:"
-        pm2 list
+        $PM2_CMD list
         return 0
     else
         echo "❌ Application failed to start"
-        pm2 logs zeliangmorung --lines 20
+        echo "📋 Checking PM2 logs..."
+        $PM2_CMD logs zeliangmorung --lines 20 --nostream 2>/dev/null || echo "No logs available yet"
+        echo ""
+        echo "💡 Try manually starting to see errors:"
+        echo "   cd $PROJECT_DIR"
+        echo "   $NODE_CMD dist/index.js"
         return 1
     fi
 }
