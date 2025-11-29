@@ -48,6 +48,91 @@ echo "   Application Port: $PORT"
 echo "   Project Directory: $PROJECT_DIR"
 echo ""
 
+# Function to check and configure firewall
+configure_firewall() {
+    echo "🔥 Checking firewall configuration..."
+    
+    # Check if ufw is active
+    if command -v ufw &> /dev/null && ufw status | grep -q "Status: active"; then
+        echo "📋 UFW firewall is active"
+        echo "🔓 Opening ports 80 and 443..."
+        ufw allow 80/tcp
+        ufw allow 443/tcp
+        echo "✅ Firewall rules updated"
+        return 0
+    fi
+    
+    # Check if firewalld is active
+    if command -v firewall-cmd &> /dev/null && systemctl is-active --quiet firewalld 2>/dev/null; then
+        echo "📋 Firewalld is active"
+        echo "🔓 Opening ports 80 and 443..."
+        firewall-cmd --permanent --add-service=http
+        firewall-cmd --permanent --add-service=https
+        firewall-cmd --reload
+        echo "✅ Firewall rules updated"
+        return 0
+    fi
+    
+    # Check iptables
+    if command -v iptables &> /dev/null; then
+        echo "📋 Checking iptables rules..."
+        if ! iptables -L INPUT -n | grep -q "dpt:80"; then
+            echo "⚠️  Port 80 might not be open in iptables"
+            echo "💡 You may need to manually configure iptables:"
+            echo "   iptables -A INPUT -p tcp --dport 80 -j ACCEPT"
+            echo "   iptables -A INPUT -p tcp --dport 443 -j ACCEPT"
+        else
+            echo "✅ Port 80 appears to be open in iptables"
+        fi
+    fi
+    
+    echo "✅ Firewall check complete"
+    return 0
+}
+
+# Function to verify DNS resolution
+verify_dns() {
+    echo "🔍 Verifying DNS configuration..."
+    
+    # Get current server IP
+    local current_ip
+    current_ip=$(curl -s ifconfig.me 2>/dev/null || curl -s icanhazip.com 2>/dev/null || echo "")
+    
+    if [ -z "$current_ip" ]; then
+        echo "⚠️  Could not determine server's public IP"
+    else
+        echo "📋 Server's public IP: $current_ip"
+        echo "📋 Expected IP: $IP"
+        if [ "$current_ip" != "$IP" ]; then
+            echo "⚠️  Warning: Server IP ($current_ip) does not match expected IP ($IP)"
+        fi
+    fi
+    
+    # Check DNS resolution
+    local resolved_ip
+    resolved_ip=$(dig +short "$DOMAIN" 2>/dev/null | tail -1)
+    
+    if [ -z "$resolved_ip" ]; then
+        echo "❌ DNS resolution failed for $DOMAIN"
+        echo "💡 Please ensure $DOMAIN points to $IP"
+        return 1
+    else
+        echo "📋 $DOMAIN resolves to: $resolved_ip"
+        if [ "$resolved_ip" != "$IP" ]; then
+            echo "⚠️  Warning: DNS points to $resolved_ip, but expected $IP"
+            echo "💡 DNS may not be configured correctly"
+            read -p "Continue anyway? (y/n): " confirm
+            if [ "$confirm" != "y" ]; then
+                return 1
+            fi
+        else
+            echo "✅ DNS is correctly configured"
+        fi
+    fi
+    
+    return 0
+}
+
 # Function to handle port 80 conflicts
 handle_port_conflicts() {
     echo "🔍 Checking for port 80 conflicts..."
@@ -172,6 +257,19 @@ setup_ssl() {
         fi
     fi
     
+    # Verify DNS first
+    if ! verify_dns; then
+        echo "❌ DNS verification failed"
+        echo "💡 Please ensure:"
+        echo "   1. $DOMAIN points to $IP"
+        echo "   2. DNS propagation is complete (can take up to 48 hours)"
+        echo "   3. You can verify with: dig $DOMAIN"
+        return 1
+    fi
+    
+    # Configure firewall
+    configure_firewall
+    
     # Install certbot if not available
     if ! command -v certbot &> /dev/null; then
         echo "📦 Installing certbot..."
@@ -179,12 +277,20 @@ setup_ssl() {
         apt install -y certbot python3-certbot-apache
     fi
     
+    # Install dnsutils for dig command if not available
+    if ! command -v dig &> /dev/null; then
+        echo "📦 Installing dnsutils..."
+        apt install -y dnsutils
+    fi
+    
     # Handle port conflicts
     handle_port_conflicts
     
     # Get certificate using standalone mode
+    echo ""
     echo "🌐 Obtaining Let's Encrypt certificate for $DOMAIN..."
-    echo "⚠️  IMPORTANT: Ensure $DOMAIN points to $IP and DNS propagation is complete"
+    echo "⚠️  This will start a temporary web server on port 80"
+    echo "⚠️  Make sure port 80 is accessible from the internet"
     echo ""
     
     certbot certonly --standalone \
@@ -194,13 +300,34 @@ setup_ssl() {
         --no-eff-email \
         -d "$DOMAIN"
     
-    if [ $? -eq 0 ] && [ -f "$CERT_FILE" ]; then
+    local certbot_exit=$?
+    
+    if [ $certbot_exit -eq 0 ] && [ -f "$CERT_FILE" ]; then
         echo "✅ SSL certificate obtained successfully"
         echo "   Certificate: $CERT_FILE"
         echo "   Key: $KEY_FILE"
         return 0
     else
+        echo ""
         echo "❌ Failed to obtain SSL certificate"
+        echo ""
+        echo "🔧 Troubleshooting steps:"
+        echo "   1. Verify DNS: dig $DOMAIN (should return $IP)"
+        echo "   2. Check firewall: Ensure ports 80 and 443 are open"
+        echo "   3. Test connectivity: curl -I http://$DOMAIN"
+        echo "   4. Check if port 80 is accessible from outside:"
+        echo "      - From another machine: curl -I http://$IP"
+        echo "   5. Check firewall rules:"
+        echo "      - UFW: ufw status"
+        echo "      - Firewalld: firewall-cmd --list-all"
+        echo "      - iptables: iptables -L -n"
+        echo ""
+        echo "💡 Common issues:"
+        echo "   - Firewall blocking port 80"
+        echo "   - DNS not pointing to correct IP"
+        echo "   - Cloud provider security groups blocking port 80"
+        echo "   - ISP blocking port 80"
+        echo ""
         return 1
     fi
 }
