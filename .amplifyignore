@@ -1,0 +1,17 @@
+# Files and directories to ignore during Amplify deployment
+node_modules/
+.envdev
+.env
+*.log
+.DS_Store
+dist/
+enhance_images.py
+enhance_images_ai.py
+requirements.txt
+ai_image_prompt_morung_interior.txt
+AMPLIFY_DEPLOYMENT.md
+*.backup.*
+attached_assets/enhanced/
+*.md
+!README.md
+
