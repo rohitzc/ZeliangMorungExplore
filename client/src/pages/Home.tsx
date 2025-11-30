@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Hero from "@/components/Hero";
 import VillageCard from "@/components/VillageCard";
@@ -18,6 +19,24 @@ interface HomeProps {
 }
 
 export default function Home({ onNavigate, onVillageClick }: HomeProps) {
+  // Preload hero image
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = heroImage;
+    link.fetchPriority = 'high';
+    document.head.appendChild(link);
+
+    // Also preload using Image object
+    const img = new Image();
+    img.src = heroImage;
+
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
+
   const { data: villages, isLoading: villagesLoading } = useQuery<Village[]>({
     queryKey: ['/api/villages'],
   });

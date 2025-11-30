@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
 
@@ -9,18 +10,35 @@ interface HeroProps {
 }
 
 export default function Hero({ title, subtitle, imageSrc, onExplore }: HeroProps) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  // Preload the image
+  useEffect(() => {
+    const img = new Image();
+    img.src = imageSrc;
+    img.onload = () => setImageLoaded(true);
+    img.onerror = () => setImageError(true);
+  }, [imageSrc]);
+
   return (
     <div className="relative h-[85vh] w-full overflow-hidden">
+      {!imageLoaded && !imageError && (
+        <div className="absolute inset-0 bg-gradient-to-br from-muted to-muted/50 animate-pulse" />
+      )}
       <img 
         src={imageSrc}
         alt="Zeliang Heritage"
-        className="absolute inset-0 h-full w-full object-cover"
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
+          imageLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
         loading="eager"
         fetchpriority="high"
-        decoding="async"
+        decoding="auto"
+        onLoad={() => setImageLoaded(true)}
         onError={(e) => {
           console.error('Failed to load hero image:', imageSrc);
-          // Fallback to a solid color if image fails
+          setImageError(true);
           e.currentTarget.style.display = 'none';
         }}
       />
