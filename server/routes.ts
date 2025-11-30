@@ -11,8 +11,18 @@ import { glossaryTerms } from "./data/glossary";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Serve static assets (images) from attached_assets folder
-  app.use("/assets", express.static(path.resolve(__dirname, "..", "attached_assets")));
+  // Serve static assets (images) from attached_assets folder with cache headers
+  app.use("/assets", express.static(path.resolve(__dirname, "..", "attached_assets"), {
+    etag: true,
+    lastModified: true,
+    maxAge: 0, // Don't cache aggressively - allow immediate revalidation
+    setHeaders: (res, path) => {
+      // For images, set cache-control to allow revalidation
+      if (path.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
+        res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+      }
+    }
+  }));
 
   // Get all villages
   app.get("/api/villages", (req, res) => {

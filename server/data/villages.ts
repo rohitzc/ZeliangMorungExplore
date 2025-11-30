@@ -119,7 +119,7 @@ export const villages: Village[] = [
   {
     id: 'puilwa',
     name: 'Puilwa Village',
-    imageSrc: '/assets/A. Z. Phizo Cave in Puliwa Village.jpg',
+    imageSrc: '/assets/A. Z. Phizo Cave in Puilwa Village.jpg',
     distance: '25-30 KM from Peren town',
     highlights: [
       'Rani Gaidinliu refuge caves (1932)',

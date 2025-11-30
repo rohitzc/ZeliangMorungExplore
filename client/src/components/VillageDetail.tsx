@@ -32,9 +32,9 @@ const formatImageName = (imagePath: string): string => {
     return 'Milei Ngyi Festival in Peren';
   }
   
-  // Special handling for A. Z. Phizo Cave in Puliwa Village
-  if (name.toLowerCase().includes('a. z. phizo cave') && name.toLowerCase().includes('puliwa')) {
-    return 'A. Z. Phizo Cave in Puliwa Village';
+  // Special handling for A. Z. Phizo Cave in Puilwa Village
+  if (name.toLowerCase().includes('a. z. phizo cave') && (name.toLowerCase().includes('puilwa') || name.toLowerCase().includes('puliwa'))) {
+    return 'A. Z. Phizo Cave in Puilwa Village';
   }
   
   // Special handling for Nzauna Tree (ensure correct spelling)
