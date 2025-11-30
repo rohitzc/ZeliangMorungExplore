@@ -32,6 +32,11 @@ const formatImageName = (imagePath: string): string => {
     return 'Milei Ngyi Festival in Peren';
   }
   
+  // Special handling for saltwater lake
+  if (name.toLowerCase().includes('saltwater lake')) {
+    return 'Mineral Salt Spring well';
+  }
+  
   // Special handling for rani cave images
   if (name.toLowerCase().includes('rani cave')) {
     return 'Rani Cave';
