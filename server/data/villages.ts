@@ -50,22 +50,15 @@ export const villages: Village[] = [
     imageSrc: '/assets/pedi-village.jpg',
     distance: '70-75 KM from Kohima approx via Khonoma-Dzulakie-Poilwa-Benreu',
     highlights: [
-      'British-era Inspection Bungalow',
       'Hepuilwa/Hecingpeikaria mountain peak trekking',
       'Offshoot of Benreu village'
     ],
     bestSeason: 'Year-round',
-    description: 'Pedi is an offshoot village of Benreu village. Known for the standing British Inspection Bungalow. There is also a small mountain peak known as Hepuilwa/Hecingpeikaria which has a 45 minute-walk trekking trail to the summit.',
+    description: 'Pedi is an offshoot village of Benreu village. There is a small mountain peak known as Hepuilwa/Hecingpeikaria which has a 45 minute-walk trekking trail to the summit.',
     attractions: [
-      'Historic British Inspection Bungalow still standing',
       'Hepuilwa/Hecingpeikaria mountain peak with 45-minute trekking trail',
       'Summit views of surrounding landscapes',
-      'Colonial-era architecture and heritage',
       'Scenic trekking trails'
-    ],
-    additionalImages: [
-      '/assets/inspection bunglow 1.jpg',
-      '/assets/inspection bunglow 2.jpg'
     ]
   },
   {
@@ -91,7 +84,9 @@ export const villages: Village[] = [
       '/assets/traditional salt making2.png',
       '/assets/traditional salt making3.png',
       '/assets/cosmos-festival.jpg',
-      '/assets/saltwater lake.jpg'
+      '/assets/saltwater lake.jpg',
+      '/assets/inspection bunglow 1.jpg',
+      '/assets/inspection bunglow 2.jpg'
     ]
   },
   {
