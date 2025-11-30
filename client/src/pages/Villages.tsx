@@ -26,9 +26,11 @@ export default function Villages({ initialVillageId = null, onVillageDeselect }:
         setSelectedVillage(village);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
+    } else if (!initialVillageId && selectedVillage) {
+      // Clear selection when initialVillageId becomes null (e.g., when clicking villages tab from detail view)
+      setSelectedVillage(null);
     }
-    // Don't clear selection when initialVillageId is null - let user navigate manually
-  }, [initialVillageId, villages]);
+  }, [initialVillageId, villages, selectedVillage]);
 
   // Scroll to top when village detail opens
   useEffect(() => {

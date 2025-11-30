@@ -90,7 +90,8 @@ export const villages: Village[] = [
     additionalImages: [
       '/assets/traditional salt making2.png',
       '/assets/traditional salt making3.png',
-      '/assets/cosmos-festival.jpg'
+      '/assets/cosmos-festival.jpg',
+      '/assets/saltwater lake.jpg'
     ]
   },
   {

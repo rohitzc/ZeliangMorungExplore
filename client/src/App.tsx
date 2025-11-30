@@ -16,8 +16,11 @@ function App() {
   const [selectedVillageId, setSelectedVillageId] = useState<string | null>(null);
 
   const handleNavigate = (section: string) => {
+    // Always clear selected village when navigating, even if staying on the same tab
+    if (section === 'villages') {
+      setSelectedVillageId(null);
+    }
     setActiveTab(section);
-    setSelectedVillageId(null); // Clear selected village when navigating to a new section
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

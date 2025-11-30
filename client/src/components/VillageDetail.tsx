@@ -21,6 +21,45 @@ interface VillageDetailProps {
   onBack?: () => void;
 }
 
+// Helper function to format image name to display text
+const formatImageName = (imagePath: string): string => {
+  const filename = imagePath.split('/').pop() || '';
+  // Remove extension
+  let name = filename.replace(/\.[^/.]+$/, '');
+  
+  // Special handling for Peren-Village2.jpg
+  if (name.toLowerCase() === 'peren-village2' || name.toLowerCase() === 'peren village2') {
+    return 'Milei Ngyi Festival in Peren';
+  }
+  
+  // Special handling for rani cave images
+  if (name.toLowerCase().includes('rani cave')) {
+    return 'Rani Cave';
+  }
+  
+  // Special handling for inspection bungalow images
+  if (name.toLowerCase().includes('inspection bunglow') || name.toLowerCase().includes('inspection bungalow')) {
+    return 'British Inspection Bunglow';
+  }
+  
+  // Special handling for traditional salt making images
+  if (name.toLowerCase().includes('traditional salt making')) {
+    return 'Traditional Salt Making';
+  }
+  
+  // Special handling for morung images
+  if (name.toLowerCase().includes('morung')) {
+    return 'Morung';
+  }
+  
+  // Replace underscores and hyphens with spaces
+  name = name.replace(/[_-]/g, ' ');
+  // Convert to title case
+  name = name.replace(/\b\w/g, (char) => char.toUpperCase());
+  
+  return name;
+};
+
 export default function VillageDetail({
   name,
   imageSrc,
@@ -32,6 +71,7 @@ export default function VillageDetail({
   onBack
 }: VillageDetailProps) {
   const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
 
   // Encode image URLs to handle spaces and special characters
   const encodeImageUrl = (url: string) => {
@@ -42,9 +82,21 @@ export default function VillageDetail({
     return parts.slice(0, -1).join('/') + '/' + encodedFilename;
   };
 
-  // Combine main image with additional images and encode URLs
-  const allImages = [imageSrc, ...additionalImages].map(encodeImageUrl);
+  // Combine main image with additional images
+  const allImagePaths = [imageSrc, ...additionalImages];
+  const allImages = allImagePaths.map(encodeImageUrl);
   const hasMultipleImages = allImages.length > 1;
+
+  // Track current slide
+  useEffect(() => {
+    if (!api) return;
+
+    setCurrent(api.selectedScrollSnap());
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [api]);
 
   // Auto-scroll carousel
   useEffect(() => {
@@ -103,14 +155,44 @@ export default function VillageDetail({
               ))}
             </CarouselContent>
           </Carousel>
+          
+          {/* Carousel Indicators */}
+          <div className="flex justify-center gap-2 mt-4 px-4">
+            {allImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => api?.scrollTo(index)}
+                className={`h-2 w-2 rounded-full transition-all ${
+                  current === index
+                    ? 'bg-primary w-6'
+                    : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+          
+          {/* Image Label */}
+          <div className="text-center mt-2 px-4">
+            <p className="text-sm text-muted-foreground">
+              {formatImageName(allImagePaths[current])}
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="aspect-video md:aspect-[21/9] w-full overflow-hidden">
-          <img 
-            src={encodeImageUrl(imageSrc)} 
-            alt={name}
-            className="h-full w-full object-cover"
-          />
+        <div>
+          <div className="aspect-video md:aspect-[21/9] w-full overflow-hidden">
+            <img 
+              src={encodeImageUrl(imageSrc)} 
+              alt={name}
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <div className="text-center mt-2 px-4">
+            <p className="text-sm text-muted-foreground">
+              {formatImageName(imageSrc)}
+            </p>
+          </div>
         </div>
       )}
 

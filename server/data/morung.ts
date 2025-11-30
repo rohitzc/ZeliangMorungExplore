@@ -3,8 +3,11 @@ import { MorungResponse } from "@shared/schema";
 export const morungData: MorungResponse = {
   title: "Rehangki: The Traditional Morung",
   description: "Rehangki, also known as the Morung, is basically a traditional male dormitory which also served as a training centre and social hub for young men. Every clan of a particular Zeliang village has their own clan's Rehangki. The word 'Rehang' means male youth and 'Ki' means house. So, the word Rehangki literally means a house for the male of a village.",
-  imageSrc: '/assets/A morung in Peren Village.jpg',
+  imageSrc: '/assets/morung1.JPG',
   interiorImageSrc: '/assets/Morung-interior.jpg',
+  additionalImages: [
+    '/assets/morung2.JPG'
+  ],
   sections: [
     {
       title: "Structure & Architecture",

@@ -35,6 +35,7 @@ export default function Morung() {
         title={morungData.title}
         description={morungData.description}
         imageSrc={morungData.imageSrc}
+        additionalImages={morungData.additionalImages}
         sections={morungData.sections}
       />
 

@@ -46,6 +46,7 @@ export type MorungResponse = {
   description: string;
   imageSrc: string;
   interiorImageSrc: string;
+  additionalImages?: string[];
   sections: MorungSectionData[];
 };
 export type GlossaryResponse = GlossaryTerm[];
