@@ -15,6 +15,9 @@ export default function Hero({ title, subtitle, imageSrc, onExplore }: HeroProps
         src={imageSrc}
         alt="Zeliang Heritage"
         className="absolute inset-0 h-full w-full object-cover"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
         onError={(e) => {
           console.error('Failed to load hero image:', imageSrc);
           // Fallback to a solid color if image fails

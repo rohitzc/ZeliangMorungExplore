@@ -13,6 +13,7 @@ interface VillagesProps {
 
 export default function Villages({ initialVillageId = null, onVillageDeselect }: VillagesProps = {}) {
   const [selectedVillage, setSelectedVillage] = useState<Village | null>(null);
+  const [prevInitialVillageId, setPrevInitialVillageId] = useState<string | null>(initialVillageId);
   
   const { data: villages, isLoading } = useQuery<Village[]>({
     queryKey: ['/api/villages'],
@@ -22,15 +23,17 @@ export default function Villages({ initialVillageId = null, onVillageDeselect }:
   useEffect(() => {
     if (initialVillageId && villages) {
       const village = villages.find(v => v.id === initialVillageId);
-      if (village && selectedVillage?.id !== initialVillageId) {
+      if (village) {
         setSelectedVillage(village);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-    } else if (!initialVillageId && selectedVillage) {
-      // Clear selection when initialVillageId becomes null (e.g., when clicking villages tab from detail view)
+    } else if (!initialVillageId && prevInitialVillageId) {
+      // Clear selection only when initialVillageId changes from a value to null
+      // This happens when clicking villages tab from detail view
       setSelectedVillage(null);
     }
-  }, [initialVillageId, villages, selectedVillage]);
+    setPrevInitialVillageId(initialVillageId);
+  }, [initialVillageId, villages, prevInitialVillageId]);
 
   // Scroll to top when village detail opens
   useEffect(() => {

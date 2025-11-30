@@ -27,6 +27,8 @@ export default function FestivalCard({
             src={imageSrc} 
             alt={name}
             className="h-full w-full object-cover"
+            loading="lazy"
+            decoding="async"
           />
         </div>
       )}

@@ -1,5 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { MapPin, Mountain, Calendar, ExternalLink } from "lucide-react";
 
 interface VillageCardProps {
@@ -36,9 +34,9 @@ export default function VillageCard({
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${name}, Nagaland, India`)}`;
 
   return (
-    <Card 
-      className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer group"
-      onClick={onClick}
+    <div 
+      className="overflow-hidden rounded-xl border bg-card border-card-border text-card-foreground shadow-sm hover-elevate active-elevate-2 cursor-pointer group"
+      onClick={() => onClick?.()}
       data-testid={`card-village-${name.toLowerCase()}`}
     >
       {/* Clean image without overlays */}
@@ -47,12 +45,14 @@ export default function VillageCard({
           src={imageSrc} 
           alt={name}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
+          decoding="async"
         />
         {/* Subtle gradient overlay on hover for better text readability if needed */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/0 to-black/0 group-hover:from-black/5 group-hover:to-black/0 transition-all duration-300" />
       </div>
       
-      <CardContent className="p-6 space-y-4">
+      <div className="p-6 space-y-4">
         {/* Village Name */}
         <h3 className="font-serif text-2xl font-semibold" data-testid={`text-village-name-${name.toLowerCase()}`}>
           {name}
@@ -102,7 +102,7 @@ export default function VillageCard({
             </span>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

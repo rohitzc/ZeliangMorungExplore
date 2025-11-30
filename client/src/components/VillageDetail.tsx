@@ -87,16 +87,33 @@ export default function VillageDetail({
   const allImages = allImagePaths.map(encodeImageUrl);
   const hasMultipleImages = allImages.length > 1;
 
-  // Track current slide
+  // Track current slide and preload adjacent images
   useEffect(() => {
     if (!api) return;
 
     setCurrent(api.selectedScrollSnap());
 
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-  }, [api]);
+    const handleSelect = () => {
+      const newCurrent = api.selectedScrollSnap();
+      setCurrent(newCurrent);
+      
+      // Preload next and previous images for smoother transitions
+      if (newCurrent < allImages.length - 1) {
+        const nextImg = new Image();
+        nextImg.src = allImages[newCurrent + 1];
+      }
+      if (newCurrent > 0) {
+        const prevImg = new Image();
+        prevImg.src = allImages[newCurrent - 1];
+      }
+    };
+
+    api.on("select", handleSelect);
+
+    return () => {
+      api.off("select", handleSelect);
+    };
+  }, [api, allImages]);
 
   // Auto-scroll carousel
   useEffect(() => {
@@ -149,6 +166,16 @@ export default function VillageDetail({
                       src={img} 
                       alt={`${name} - Image ${index + 1}`}
                       className="h-full w-full object-cover"
+                      loading={index === 0 ? "eager" : "lazy"}
+                      fetchpriority={index === 0 ? "high" : "low"}
+                      decoding="async"
+                      onLoad={(e) => {
+                        // Preload next image for smoother carousel transitions
+                        if (index < allImages.length - 1) {
+                          const nextImg = new Image();
+                          nextImg.src = allImages[index + 1];
+                        }
+                      }}
                     />
                   </div>
                 </CarouselItem>
@@ -186,6 +213,9 @@ export default function VillageDetail({
               src={encodeImageUrl(imageSrc)} 
               alt={name}
               className="h-full w-full object-cover"
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
             />
           </div>
           <div className="text-center mt-2 px-4">

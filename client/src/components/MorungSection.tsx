@@ -52,16 +52,33 @@ export default function MorungSection({ title, description, imageSrc, additional
   const allImages = allImagePaths.map(encodeImageUrl);
   const hasMultipleImages = allImages.length > 1;
 
-  // Track current slide
+  // Track current slide and preload adjacent images
   useEffect(() => {
     if (!api) return;
 
     setCurrent(api.selectedScrollSnap());
 
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-  }, [api]);
+    const handleSelect = () => {
+      const newCurrent = api.selectedScrollSnap();
+      setCurrent(newCurrent);
+      
+      // Preload next and previous images for smoother transitions
+      if (newCurrent < allImages.length - 1) {
+        const nextImg = new Image();
+        nextImg.src = allImages[newCurrent + 1];
+      }
+      if (newCurrent > 0) {
+        const prevImg = new Image();
+        prevImg.src = allImages[newCurrent - 1];
+      }
+    };
+
+    api.on("select", handleSelect);
+
+    return () => {
+      api.off("select", handleSelect);
+    };
+  }, [api, allImages]);
 
   // Auto-scroll carousel
   useEffect(() => {
@@ -81,24 +98,34 @@ export default function MorungSection({ title, description, imageSrc, additional
   return (
     <div className="space-y-8">
       {hasMultipleImages ? (
-        <div className="w-full relative -mx-4 md:-mx-8">
+        <div className="w-full relative">
           <Carousel 
             className="w-full" 
             setApi={setApi}
             opts={{
-              align: "start",
+              align: "center",
               loop: true,
               dragFree: false,
             }}
           >
-            <CarouselContent>
+            <CarouselContent className="flex items-center">
               {allImages.map((img, index) => (
-                <CarouselItem key={index} className="pl-0">
-                  <div className="w-full">
+                <CarouselItem key={index} className="pl-0 basis-full flex justify-center">
+                  <div className="w-full flex justify-center items-center">
                     <img 
                       src={img} 
                       alt={`${title} - Image ${index + 1}`}
-                      className="w-full h-auto object-contain"
+                      className="max-w-full h-auto object-contain mx-auto"
+                      loading={index === 0 ? "eager" : "lazy"}
+                      fetchpriority={index === 0 ? "high" : "low"}
+                      decoding="async"
+                      onLoad={(e) => {
+                        // Preload next image for smoother carousel transitions
+                        if (index < allImages.length - 1) {
+                          const nextImg = new Image();
+                          nextImg.src = allImages[index + 1];
+                        }
+                      }}
                     />
                   </div>
                 </CarouselItem>
@@ -130,12 +157,15 @@ export default function MorungSection({ title, description, imageSrc, additional
           </div>
         </div>
       ) : (
-        <div className="w-full -mx-4 md:-mx-8">
-          <div className="w-full">
+        <div className="w-full flex justify-center">
+          <div className="w-full flex justify-center items-center">
             <img 
               src={encodeImageUrl(imageSrc)} 
               alt={title}
-              className="w-full h-auto object-contain"
+              className="max-w-full h-auto object-contain mx-auto"
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
             />
           </div>
           <div className="text-center mt-2 px-4">
@@ -167,11 +197,13 @@ export default function MorungSection({ title, description, imageSrc, additional
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
                   {section.imageSrc && (
                     <div className="w-full md:h-full min-h-[250px] md:min-h-0 overflow-hidden bg-muted/30 flex items-center justify-center">
-                      <img 
-                        src={encodeImageUrl(section.imageSrc)} 
-                        alt={section.title}
-                        className="w-full h-full object-contain md:object-cover"
-                      />
+                    <img 
+                      src={encodeImageUrl(section.imageSrc)} 
+                      alt={section.title}
+                      className="w-full h-full object-contain md:object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
                     </div>
                   )}
                   <div className={`p-6 ${section.imageSrc ? 'md:flex md:flex-col md:justify-center' : ''}`}>
