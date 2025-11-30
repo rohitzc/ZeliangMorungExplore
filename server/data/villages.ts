@@ -63,6 +63,10 @@ export const villages: Village[] = [
       'Colonial-era architecture and heritage',
       'Scenic trekking trails'
     ],
+    additionalImages: [
+      '/assets/inspection bunglow 1.jpg',
+      '/assets/inspection bunglow 2.jpg'
+    ]
   },
   {
     id: 'peletkie',

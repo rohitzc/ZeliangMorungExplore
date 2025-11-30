@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import VillageCard from "@/components/VillageCard";
 import VillageDetail from "@/components/VillageDetail";
+import Footer from "@/components/Footer";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Village } from "@shared/schema";
 
@@ -93,6 +94,7 @@ export default function Villages({ initialVillageId = null, onVillageDeselect }:
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

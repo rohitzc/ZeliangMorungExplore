@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import FestivalCard from "@/components/FestivalCard";
+import Footer from "@/components/Footer";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Festival } from "@shared/schema";
 
@@ -45,6 +46,7 @@ export default function Festivals() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

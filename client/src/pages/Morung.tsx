@@ -3,6 +3,7 @@ import MorungSection from "@/components/MorungSection";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import GlossarySheet from "@/components/GlossarySheet";
+import Footer from "@/components/Footer";
 import type { MorungResponse } from "@shared/schema";
 
 export default function Morung() {
@@ -40,6 +41,7 @@ export default function Morung() {
       <div className="pt-4">
         <GlossarySheet />
       </div>
+      <Footer />
     </div>
   );
 }

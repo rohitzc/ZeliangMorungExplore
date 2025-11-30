@@ -44,25 +44,27 @@ export default function MorungSection({ title, description, imageSrc, sections }
         <div className="grid grid-cols-1 gap-6">
           {sections.map((section, index) => (
             <Card key={index} className="overflow-hidden hover-elevate transition-shadow">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-                {section.imageSrc && (
-                  <div className="w-full md:h-full min-h-[250px] md:min-h-0 overflow-hidden bg-muted/30 flex items-center justify-center">
-                    <img 
-                      src={encodeImageUrl(section.imageSrc)} 
-                      alt={section.title}
-                      className="w-full h-full object-contain md:object-cover"
-                    />
+              <CardContent className="p-0">
+                <h4 className="font-serif text-xl font-semibold p-6 pb-4">
+                  {section.title}
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+                  {section.imageSrc && (
+                    <div className="w-full md:h-full min-h-[250px] md:min-h-0 overflow-hidden bg-muted/30 flex items-center justify-center">
+                      <img 
+                        src={encodeImageUrl(section.imageSrc)} 
+                        alt={section.title}
+                        className="w-full h-full object-contain md:object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className={`p-6 ${section.imageSrc ? 'md:flex md:flex-col md:justify-center' : ''}`}>
+                    <p className="text-base leading-relaxed text-muted-foreground">
+                      {section.content}
+                    </p>
                   </div>
-                )}
-                <CardContent className={`p-6 ${section.imageSrc ? 'md:flex md:flex-col md:justify-center' : ''}`}>
-                  <h4 className="font-serif text-xl font-semibold mb-3">
-                    {section.title}
-                  </h4>
-                  <p className="text-base leading-relaxed text-muted-foreground">
-                    {section.content}
-                  </p>
-                </CardContent>
-              </div>
+                </div>
+              </CardContent>
             </Card>
           ))}
         </div>

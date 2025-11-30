@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
+import Footer from "@/components/Footer";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { GlossaryTerm } from "@shared/schema";
 
@@ -67,6 +68,7 @@ export default function Glossary() {
           ))}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

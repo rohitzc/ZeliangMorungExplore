@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import VillageCard from "@/components/VillageCard";
 import FestivalCard from "@/components/FestivalCard";
 import GlossarySheet from "@/components/GlossarySheet";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight } from "lucide-react";
@@ -153,6 +154,7 @@ export default function Home({ onNavigate, onVillageClick }: HomeProps) {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

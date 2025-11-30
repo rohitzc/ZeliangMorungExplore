@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import Footer from "@/components/Footer";
 import { ArrowLeft, Mountain, Info } from "lucide-react";
 import {
   Carousel,
@@ -141,6 +142,7 @@ export default function VillageDetail({
           </CardContent>
         </Card>
       </div>
+      <Footer />
     </div>
   );
 }
