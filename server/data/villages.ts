@@ -119,7 +119,7 @@ export const villages: Village[] = [
   {
     id: 'puilwa',
     name: 'Puilwa Village',
-    imageSrc: '/assets/A. Z. Phizo Cave in Pulima Village.jpg',
+    imageSrc: '/assets/A. Z. Phizo Cave in Puliwa Village.jpg',
     distance: '25-30 KM from Peren town',
     highlights: [
       'Rani Gaidinliu refuge caves (1932)',
@@ -144,7 +144,7 @@ export const villages: Village[] = [
   {
     id: 'nzauna',
     name: 'Nzauna Village',
-    imageSrc: '/assets/Nazuna Tree.jpg',
+    imageSrc: '/assets/Nzauna Tree.jpg',
     distance: '124 KM approx from Peren town (southernmost part of Peren district)',
     highlights: [
       'Mt. Kisa at 1325m elevation',
