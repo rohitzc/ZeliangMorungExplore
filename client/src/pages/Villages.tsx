@@ -66,7 +66,7 @@ export default function Villages({ initialVillageId = null, onVillageDeselect }:
     <div className="min-h-screen pb-20 px-4 py-8 max-w-6xl mx-auto">
       <div className="space-y-6">
         <div>
-          <h1 className="font-serif text-3xl font-bold mb-2">Explore Villages</h1>
+          <h1 className="font-serif text-3xl font-bold mb-2">Places to Visit</h1>
           <p className="text-muted-foreground">
             Discover the beauty and heritage of Peren District's seven remarkable villages
           </p>

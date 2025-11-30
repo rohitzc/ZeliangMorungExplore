@@ -66,7 +66,7 @@ export default function Home({ onNavigate, onVillageClick }: HomeProps) {
         <div className="space-y-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <h2 className="font-serif text-3xl font-bold mb-2">Explore Villages</h2>
+              <h2 className="font-serif text-3xl font-bold mb-2">Places to Visit</h2>
               <p className="text-muted-foreground">Discover the beauty of Peren District</p>
             </div>
             <Button 

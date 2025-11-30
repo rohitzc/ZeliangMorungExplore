@@ -13,7 +13,7 @@ interface BottomNavProps {
 
 const navItems: NavItem[] = [
   { icon: Home, label: "Home", id: "home" },
-  { icon: MapIcon, label: "Villages", id: "villages" },
+  { icon: MapIcon, label: "Places to Visit", id: "villages" },
   { icon: Building2, label: "Morung", id: "morung" },
   { icon: Calendar, label: "Festivals", id: "festivals" },
   { icon: Book, label: "Glossary", id: "glossary" },
