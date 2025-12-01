@@ -64,7 +64,7 @@ export const villages: Village[] = [
   {
     id: 'peletkie',
     name: 'Peletkie Village',
-    imageSrc: '/assets/traditional salt making.png',
+    imageSrc: '/assets/traditional salt making.jpg',
     distance: '110 KM from Kohima via Khonoma-Dzulakie-Poilwa-Benreu',
     highlights: [
       'Cosmos blossom festival in October',
@@ -81,8 +81,8 @@ export const villages: Village[] = [
       'Cultural preservation of traditional practices'
     ],
     additionalImages: [
-      '/assets/traditional salt making2.png',
-      '/assets/traditional salt making3.png',
+      '/assets/traditional salt making2.jpg',
+      '/assets/traditional salt making3.jpg',
       '/assets/cosmos-festival.jpg',
       '/assets/saltwater lake.jpg',
       '/assets/inspection bunglow 1.jpg',
