@@ -34,7 +34,7 @@ export const festivals: Festival[] = [
     date: 'Year-round',
     location: 'Peletkie Village',
     description: 'An interesting cultural practice unique to Peletkie village where water is fetched from a particular pond area and boiled in large pots until a strong, particular kind of salt is extracted. This traditional procedure has been passed down through generations and continues to be practiced, preserving ancient knowledge and methods.',
-    imageSrc: '/assets/traditional salt making2.png',
+    imageSrc: '/assets/traditional salt making2.jpg',
     highlight: 'Cultural Heritage'
   }
 ];
