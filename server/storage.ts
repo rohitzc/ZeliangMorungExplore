@@ -2,12 +2,24 @@
 // This file can be expanded if you need dynamic data management in the future
 
 export interface IStorage {
-  // Add storage methods as needed
+  getVisitorCount(): number;
+  incrementVisitorCount(): number;
 }
 
 export class MemStorage implements IStorage {
+  private visitorCount: number = 0;
+
   constructor() {
     // Initialize storage if needed
+  }
+
+  getVisitorCount(): number {
+    return this.visitorCount;
+  }
+
+  incrementVisitorCount(): number {
+    this.visitorCount += 1;
+    return this.visitorCount;
   }
 }
 

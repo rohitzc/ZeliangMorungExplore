@@ -7,6 +7,7 @@ import { villages } from "./data/villages";
 import { festivals } from "./data/festivals";
 import { morungData } from "./data/morung";
 import { glossaryTerms } from "./data/glossary";
+import { storage } from "./storage";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -51,6 +52,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get glossary terms
   app.get("/api/glossary", (req, res) => {
     res.json(glossaryTerms);
+  });
+
+  // Get visitor count
+  app.get("/api/visitor-count", (req, res) => {
+    res.json({ count: storage.getVisitorCount() });
+  });
+
+  // Increment visitor count (called when a new visitor arrives)
+  app.post("/api/visitor-count/increment", (req, res) => {
+    const count = storage.incrementVisitorCount();
+    res.json({ count });
   });
 
   const httpServer = createServer(app);

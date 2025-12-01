@@ -9,6 +9,10 @@ export default function Glossary() {
     queryKey: ['/api/glossary'],
   });
 
+  const { data: visitorData } = useQuery<{ count: number }>({
+    queryKey: ['/api/visitor-count'],
+  });
+
   const categories = Array.from(new Set(glossaryTerms?.map(t => t.category) || []));
 
   if (isLoading) {
@@ -67,6 +71,27 @@ export default function Glossary() {
             </Card>
           ))}
         </div>
+        
+        {/* Visitor Counter */}
+        {visitorData && (
+          <Card className="mt-8 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center justify-center space-y-3">
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                  Total Visitors
+                </p>
+                <div className="flex items-baseline space-x-2">
+                  <span className="font-serif text-5xl font-bold text-primary">
+                    {visitorData.count.toLocaleString()}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground text-center max-w-md">
+                  Exploring Zeliang culture and traditions
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
       <Footer />
     </div>

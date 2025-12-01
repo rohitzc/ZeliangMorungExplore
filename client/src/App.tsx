@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, useQueryClient, useMutation } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,9 +11,32 @@ import Morung from "@/pages/Morung";
 import Festivals from "@/pages/Festivals";
 import Glossary from "@/pages/Glossary";
 
-function App() {
+function AppContent() {
   const [activeTab, setActiveTab] = useState('home');
   const [selectedVillageId, setSelectedVillageId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const incrementVisitor = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/visitor-count/increment', {
+        method: 'POST',
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(['/api/visitor-count'], { count: data.count });
+    },
+  });
+
+  // Track visitor on app mount (only once per session)
+  useEffect(() => {
+    const hasVisited = sessionStorage.getItem('hasVisited');
+    if (!hasVisited) {
+      incrementVisitor.mutate();
+      sessionStorage.setItem('hasVisited', 'true');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Scroll to top whenever activeTab changes
   useEffect(() => {
@@ -40,23 +63,29 @@ function App() {
   };
 
   return (
+    <TooltipProvider>
+      <div className="min-h-screen bg-background">
+        {activeTab === 'home' && (
+          <Home onNavigate={handleNavigate} onVillageClick={handleVillageClick} />
+        )}
+        {activeTab === 'villages' && (
+          <Villages initialVillageId={selectedVillageId} onVillageDeselect={() => setSelectedVillageId(null)} />
+        )}
+        {activeTab === 'morung' && <Morung />}
+        {activeTab === 'festivals' && <Festivals />}
+        {activeTab === 'glossary' && <Glossary />}
+        
+        <BottomNav activeTab={activeTab} onTabChange={handleNavigate} />
+      </div>
+      <Toaster />
+    </TooltipProvider>
+  );
+}
+
+function App() {
+  return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <div className="min-h-screen bg-background">
-          {activeTab === 'home' && (
-            <Home onNavigate={handleNavigate} onVillageClick={handleVillageClick} />
-          )}
-          {activeTab === 'villages' && (
-            <Villages initialVillageId={selectedVillageId} onVillageDeselect={() => setSelectedVillageId(null)} />
-          )}
-          {activeTab === 'morung' && <Morung />}
-          {activeTab === 'festivals' && <Festivals />}
-          {activeTab === 'glossary' && <Glossary />}
-          
-          <BottomNav activeTab={activeTab} onTabChange={handleNavigate} />
-        </div>
-        <Toaster />
-      </TooltipProvider>
+      <AppContent />
     </QueryClientProvider>
   );
 }
