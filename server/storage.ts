@@ -7,7 +7,7 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
-  private visitorCount: number = 0;
+  private visitorCount: number = 50;
 
   constructor() {
     // Initialize storage if needed

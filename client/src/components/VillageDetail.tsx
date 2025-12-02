@@ -37,6 +37,16 @@ const formatImageName = (imagePath: string): string => {
     return 'A. Z. Phizo Cave in Puilwa Village';
   }
   
+  // Special handling for Pliva Village Sheep Farm (should be Poilwa)
+  if (name.toLowerCase().includes('pliva village sheep farm')) {
+    return 'Poilwa Village Sheep Farm';
+  }
+  
+  // Special handling for Beneru Village (should be Benreu)
+  if (name.toLowerCase().includes('beneru village')) {
+    return 'Benreu Village';
+  }
+  
   // Special handling for Nzauna Tree (ensure correct spelling)
   if (name.toLowerCase().includes('nzauna tree') || name.toLowerCase().includes('nazuna tree')) {
     return 'Nzauna Tree';
