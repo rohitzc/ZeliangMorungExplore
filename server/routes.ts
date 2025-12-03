@@ -25,6 +25,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  // Middleware to set no-cache headers for all API responses
+  app.use("/api", (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+  });
+
   // Get all villages
   app.get("/api/villages", (req, res) => {
     res.json(villages);

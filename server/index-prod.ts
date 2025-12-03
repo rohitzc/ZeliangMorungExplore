@@ -22,10 +22,37 @@ export async function serveStatic(app: Express, _server: Server) {
     );
   }
 
-  app.use(express.static(distPath));
+  // Serve static files with appropriate cache headers
+  app.use(express.static(distPath, {
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, filePath) => {
+      const fileName = path.basename(filePath);
+      
+      // Never cache HTML files - always fetch fresh version
+      if (fileName === "index.html" || filePath.endsWith(".html")) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+      }
+      // JS and CSS files with hashes can be cached longer (Vite adds hashes to filenames)
+      // But still allow revalidation to ensure updates are picked up
+      else if (filePath.match(/\.(js|css)$/i)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+      // Other assets (images, fonts, etc.)
+      else {
+        res.setHeader('Cache-Control', 'public, max-age=86400, must-revalidate');
+      }
+    }
+  }));
 
   // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
+    // Ensure index.html is never cached
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
