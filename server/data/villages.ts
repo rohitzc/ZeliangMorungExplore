@@ -48,7 +48,7 @@ export const villages: Village[] = [
     id: 'pedi',
     name: 'Pedi Village',
     imageSrc: '/assets/pedi-village.jpg',
-    distance: '70-75 KM from Kohima approx via Khonoma-Dzulakie-Poilwa-Benreu',
+    distance: '70-75 KM from Kohima via Khonoma-Dzulakie-Poilwa-Benreu',
     highlights: [
       'Hepuilwa/Hecingpeikaria mountain peak trekking',
       'Offshoot of Benreu village'
@@ -120,7 +120,7 @@ export const villages: Village[] = [
     id: 'puilwa',
     name: 'Puilwa Village',
     imageSrc: '/assets/A. Z. Phizo Cave in Puilwa Village.jpg',
-    distance: '25-30 KM from Peren town',
+    distance: '25-30 KM from Peren',
     highlights: [
       'Rani Gaidinliu refuge caves (1932)',
       'A. Z. Phizo hide-out caves (1956)',
@@ -145,7 +145,7 @@ export const villages: Village[] = [
     id: 'nzauna',
     name: 'Nzauna Village',
     imageSrc: '/assets/Nzauna Tree.jpg',
-    distance: '124 KM approx from Peren town (southernmost part of Peren district)',
+    distance: '124 KM approx from Peren (southernmost part of Peren district)',
     highlights: [
       'Mt. Kisa at 1325m elevation',
       'Kisa lake scenic beauty',

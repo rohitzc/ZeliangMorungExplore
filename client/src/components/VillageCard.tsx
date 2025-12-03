@@ -9,17 +9,23 @@ interface VillageCardProps {
   onClick?: () => void;
 }
 
-// Parse distance string to extract km and route
-function parseDistance(distance: string): { km: string; route: string } {
+// Parse distance string to extract km, location, and route
+function parseDistance(distance: string): { km: string; location: string; route: string } {
   // Format: "52 KM from Kohima via Khonoma-Dzulakie"
   // or: "70-75 KM from Kohima via Khonoma-Dzulakie-Poilwa-Benreu"
+  // or: "25-30 KM from Peren"
+  // or: "124 KM approx from Peren (southernmost part of Peren district)"
   const viaMatch = distance.match(/via\s+(.+)$/i);
   const kmMatch = distance.match(/^([\d-]+)\s*KM/i);
   
   const km = kmMatch ? `${kmMatch[1]} KM` : distance.split(' ')[0] + ' KM';
   const route = viaMatch ? viaMatch[1] : '';
   
-  return { km, route };
+  // Extract location: text after "from" and before " via" or "(" or end of string
+  const fromMatch = distance.match(/from\s+([^(\n]+?)(?:\s+via|\(|$)/i);
+  const location = fromMatch ? fromMatch[1].trim() : 'Kohima'; // Default to Kohima if not found
+  
+  return { km, location, route };
 }
 
 export default function VillageCard({ 
@@ -30,7 +36,7 @@ export default function VillageCard({
   bestSeason,
   onClick 
 }: VillageCardProps) {
-  const { km, route } = parseDistance(distance);
+  const { km, location, route } = parseDistance(distance);
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${name}, Nagaland, India`)}`;
 
   return (
@@ -63,7 +69,7 @@ export default function VillageCard({
           <div className="flex-1 min-w-0 space-y-1">
             <div className="flex items-center gap-2 text-sm">
               <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
-              <span className="font-medium text-foreground">{km} from Kohima</span>
+              <span className="font-medium text-foreground">{km} from {location}</span>
             </div>
             {route && (
               <div className="text-xs text-muted-foreground ml-6">
